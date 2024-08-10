@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package messaging;
+
+service MessageBroker {
+  rpc CreateChannel(CreateChannelRequest) returns (CreateChannelResponse);
+  rpc RemoveChannel(RemoveChannelRequest) returns (RemoveChannelResponse);
+  rpc ListChannels(ListChannelsRequest) returns (ListChannelsResponse);
+  rpc PublishMessage(PublishMessageRequest) returns (PublishMessageResponse);
+  rpc SubscribeChannel(SubscribeChannelRequest) returns (stream Message);
+  rpc ReceiveMessage(ReceiveMessageRequest) returns (Message);
+}
+
+message CreateChannelRequest {
+  string name = 1;
+  ChannelType type = 2;
+}
+
+message CreateChannelResponse {
+  bool success = 1;
+}
+
+message RemoveChannelRequest {
+  string name = 1;
+}
+
+message RemoveChannelResponse {
+  bool success = 1;
+}
+
+message ListChannelsRequest {}
+
+message ListChannelsResponse {
+  repeated Channel channels = 1;
+}
+
+message PublishMessageRequest {
+  string channel_name = 1;
+  bytes content = 2;
+}
+
+message PublishMessageResponse {
+  bool success = 1;
+}
+
+message SubscribeChannelRequest {
+  string channel_name = 1;
+}
+
+message ReceiveMessageRequest {
+  string channel_name = 1;
+}
+
+message Channel {
+  string name = 1;
+  ChannelType type = 2;
+  int32 pending_messages = 3;
+}
+
+message Message {
+  string channel_name = 1;
+  bytes content = 2;
+}
+
+enum ChannelType {
+  SIMPLE = 0;
+  MULTIPLE = 1;
+}
