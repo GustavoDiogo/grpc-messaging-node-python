@@ -2,7 +2,7 @@ import grpc
 import sys
 import os
 
-# Adiciona o diretório 'proto' ao caminho de importação
+# Adds the 'proto' directory to the import path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "proto")))
 
 from proto import messaging_pb2
@@ -77,92 +77,94 @@ def main():
 
     while True:
 
-        print("<<Escolha as opções>>")
-        print("1. Listar Canais")
-        print("2. Criar Canal")
-        print("3. Remover Canal")
-        print("4. Publicar Mensagem")
-        print("5. Mensagens Recebidas")
-        print("6. Salvar Mensagens no Disco")
-        print("7. Sair")
-        escolha = input("Digite sua escolha: ")
+        print("<<Choose an option>>")
+        print("1. List Channels")
+        print("2. Create Channel")
+        print("3. Remove Channel")
+        print("4. Publish Message")
+        print("5. Received Messages")
+        print("6. Save Messages to Disk")
+        print("7. Exit")
+        choice = input("Enter your choice: ")
 
-        if escolha == "1":
+        if choice == "1":
             response = client.list_channels()
             if response:
-                canais = [channel.name for channel in response.channels]
-                print(f"Resposta da Listagem de Canais: {canais}")
+                channels = [channel.name for channel in response.channels]
+                print(f"Channel List Response: {channels}")
 
-        elif escolha == "2":
-            nome = input("Digite o nome do canal: ")
-            print("Tipo de Canal (0 para SIMPLES, 1 para MÚLTIPLO): ")
-            tipo_canal_input = int(input())
-            if tipo_canal_input == 0:
-                tipo_canal = messaging_pb2.ChannelType.SIMPLE
-            elif tipo_canal_input == 1:
-                tipo_canal = messaging_pb2.ChannelType.MULTIPLE
+        elif choice == "2":
+            name = input("Enter the channel name: ")
+            print("Channel Type (0 for SIMPLE, 1 for MULTIPLE): ")
+            channel_type_input = int(input())
+            if channel_type_input == 0:
+                channel_type = messaging_pb2.ChannelType.SIMPLE
+            elif channel_type_input == 1:
+                channel_type = messaging_pb2.ChannelType.MULTIPLE
             else:
                 print(
-                    "Tipo de canal inválido. Por favor, digite 0 para SIMPLES ou 1 para MÚLTIPLO."
+                    "Invalid channel type. Please enter 0 for SIMPLE or 1 for MULTIPLE."
                 )
                 continue
-            response = client.create_channel(nome, tipo_canal)
+            response = client.create_channel(name, channel_type)
             if response:
-                print(f"Resposta da Criação do Canal: {response.success}")
+                print(f"Channel Creation Response: {response.success}")
 
-        elif escolha == "3":
-            nome = input("Digite o nome do canal para remover: ")
-            response = client.remove_channel(nome)
+        elif choice == "3":
+            name = input("Enter the name of the channel to remove: ")
+            response = client.remove_channel(name)
             if response:
-                print(f"Resposta da Remoção do Canal: {response.success}")
+                print(f"Channel Removal Response: {response.success}")
 
-        elif escolha == "4":
-            nome_canal = input("Digite o nome do canal para publicar a mensagem: ")
-            conteudo = input("Digite o conteúdo da mensagem: ").encode("utf-8")
-            response = client.publish_message(nome_canal, conteudo)
-            if response and response.success:
-                print("Mensagem Publicada")
-            else:
-                print("Falha ao publicar a mensagem")
-
-        elif escolha == "5":
-            nome_canal = input(
-                "Digite o nome do canal para se inscrever e receber mensagens: "
+        elif choice == "4":
+            channel_name = input(
+                "Enter the name of the channel to publish the message: "
             )
-            print(f"Inscrevendo-se no canal '{nome_canal}' e aguardando mensagens...")
-            responses = client.subscribe_channel(nome_canal)
+            content = input("Enter the message content: ").encode("utf-8")
+            response = client.publish_message(channel_name, content)
+            if response and response.success:
+                print("Message Published")
+            else:
+                print("Failed to publish the message")
+
+        elif choice == "5":
+            channel_name = input(
+                "Enter the name of the channel to subscribe and receive messages: "
+            )
+            print(
+                f"Subscribing to channel '{channel_name}' and waiting for messages..."
+            )
+            responses = client.subscribe_channel(channel_name)
             if responses:
                 messages = []
                 for message in responses:
                     messages.append(
-                        f"Canal: {message.channel_name}, Mensagem: {message.content.decode('utf-8')}"
+                        f"Channel: {message.channel_name}, Message: {message.content.decode('utf-8')}"
                     )
-                    print(f"Mensagem recebida: {message.content.decode('utf-8')}")
+                    print(f"Message received: {message.content.decode('utf-8')}")
             else:
-                print("Falha ao assinar o canal ou receber mensagens")
+                print("Failed to subscribe to the channel or receive messages")
 
-        elif escolha == "6":
+        elif choice == "6":
             if messages:
-                arquivo = input("Digite o nome do arquivo para salvar as mensagens: ")
+                file_name = input("Enter the file name to save the messages: ")
                 with open(
-                    arquivo, "w"
-                ) as f:  # Use 'w' para sobrescrever o arquivo, ou 'a' para anexar
+                    file_name, "w"
+                ) as f:  # Use 'w' to overwrite the file, or 'a' to append
                     for msg in messages:
                         f.write(msg + "\n")
                 print(
-                    f"Mensagens salvas no arquivo '{arquivo}' no diretório de origem da aplicação client.py"
+                    f"Messages saved to file '{file_name}' in the application root directory"
                 )
             else:
-                print(
-                    "Nenhuma mensagem para salvar. Primeiro receba mensagens com a opção 5."
-                )
+                print("No messages to save. First receive messages with option 5.")
 
-        elif escolha == "7":
-            print("Saindo...")
+        elif choice == "7":
+            print("Exiting...")
             break
 
         else:
-            print("Escolha inválida. Por favor, digite um número entre 1 e 7.")
+            print("Invalid choice. Please enter a number between 1 and 7.")
 
 
 if __name__ == "__main__":
